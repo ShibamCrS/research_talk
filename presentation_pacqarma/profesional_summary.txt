@@ -1,0 +1,15 @@
+Dr. Shibam Ghosh is a Postdoctoral Researcher at INRIA Paris, working in the COSMIQ team with Léo Perrin.
+He recently completed his PhD at the University of Haifa under the supervision of Prof. Orr Dunkelman, where his thesis focused on mathematical techniques in symmetric-key cryptanalysis.
+His doctoral work includes security analyses of modern standards such as AES, SHA-3 along with desing and analysis of various lightweight block ciphers including NIST LwC candidates.
+Before starting his PhD, Dr. Ghosh earned an M.Tech in Cryptology and Security from ISI Kolkata and an M.Sc. in Mathematics from Presidency University.
+His research in symmetric-key cryptography spans design and analysis of low-latency primitives, implementation attacks, automated cryptanalysis, and design and analysis of zero-knowledge–friendly primitives.
+He has co-designed low-latency block ciphers such as QARMAv2 and ChiLow, and his work has appeared at leading venues including EUROCRYPT, FSE, CHES as well as in ACNS, Latincrypt and Indocrypt.
+Dr. Ghosh is also active in the community as a reviewer and program committee member for venues like LightSEC, International Security Conference, DCC and FFA.
+
+Dr. Shibam Ghosh is a Postdoctoral Researcher at INRIA Paris, working in the COSMIQ team under the supervision of Dr. Léo Perrin.
+He recently earned his Ph.D. from the University of Haifa under the guidance of Prof. Orr Dunkelman, with his thesis focusing on mathematical techniques in symmetric-key cryptanalysis.
+His doctoral research encompassed security analyses of modern standards such as AES and SHA-3, alongside the design and analysis of various lightweight block ciphers, including NIST LwC candidates.
+Prior to his Ph.D., Dr. Ghosh obtained an M.Tech in Cryptology and Security from ISI Kolkata and an M.Sc. in Mathematics from Presidency University.
+His broader research interests in symmetric-key cryptography span the design and analysis of low-latency primitives, implementation attacks, automated cryptanalysis, and the design and analysis of zero-knowledge–friendly primitives.
+Notably, he has co-designed low-latency block ciphers like QARMAv2 and ChiLow, and his work has been published in top-tier conferences including EUROCRYPT, FSE, CHES, as well as ACNS, Latincrypt, and Indocrypt.
+Dr. Ghosh actively contributes to the academic community by serving as a reviewer and program committee member for venues such as LightSEC, International Security Conference, DCC, and FFA.

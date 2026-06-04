@@ -1,0 +1,24 @@
+\tikzstyle{block} = [rectangle, draw,  text width=2em, text centered,  minimum height=2.5em]
+
+\tikzstyle{block0} = [rectangle, draw,  text width=2.2em, text centered,  minimum height=1.8em]
+\tikzstyle{block1} = [rectangle, draw,  fill=blue, text width=0.2em, text centered,  minimum height=0.2em]
+\tikzstyle{block2} = [rectangle, draw,  text width=1.5em, text centered,  minimum height=1.5em]
+\tikzstyle{block3} = [rectangle, draw,  text width=4em, text centered,  minimum height=3em]
+\tikzstyle{block4} = [rectangle, draw,  text width=2em, text centered,  minimum height=2.5em]
+\tikzstyle{blocklittle} = [rectangle, draw,  text width=0.2em, text centered,  minimum height=0.5em]
+
+\tikzstyle{line} = [draw, thick, -latex]
+
+\tikzstyle{line1} = [black, draw, thick, ->, -latex]
+\tikzstyle{line2} = [red, draw, thick, dashed, ->, -latex]
+\tikzstyle{line3} = [blue, draw, thick, dotted, ->, -latex]
+\tikzstyle{line4} = [black, draw, thick, dashdotted, ->, -latex]
+
+\tikzset{DOT/.style={draw,circle,text width=0.25em}}
+
+\tikzset{XOR/.style={draw,circle,minimum size=1.3em,append after command={
+        (\tikzlastnode.north) edge (\tikzlastnode.south)
+        (\tikzlastnode.east) edge (\tikzlastnode.west)
+        }
+    }
+}
