@@ -13,7 +13,7 @@
 %\tikzset{shadows=no}  
 \usetikzlibrary{decorations.pathreplacing}
 \usetikzlibrary{arrows}
-\usetikzlibrary{arrows.meta}
+\usetikzlibrary{arrows.meta, fit, backgrounds}
 \usetikzlibrary{patterns}
 \usetikzlibrary{shapes}
 \usetikzlibrary{shadows}
@@ -64,19 +64,6 @@
 }
 
 % --- Frametitle Customization ---
-
-% % 1. Define your professional blue color (using RGB values)
-% \definecolor{professionalblue}{RGB}{0, 90, 156} % A nice, deep corporate blue
-
-% % 2. Set the frametitle colors
-% \setbeamercolor{frametitle}{
-%   fg=professionalblue,  % fg = foreground (the text color)
-%   bg=normal text.bg     % bg = background (matches the slide background, effectively removing the shade)
-% }
-% % --- Remove the headline (progress bar) ---
-% \setbeamertemplate{headline}{}
-
-
 \tcbuselibrary{many}
 % \usepackage[many]{tcolorbox}
 \setbeamertemplate{itemize item}{$\blacktriangleright$}
@@ -179,6 +166,90 @@
 }
 
 \newcommand{\h}{\ensuremath{\mathcal{H}}}
+% --- Corrected TikZ styles using the modern \tikzset syntax ---
+\tikzset{
+    block/.style = {draw, rectangle, minimum height=1cm, minimum width=1cm, thick},
+    xor/.style   = {draw, circle, thick, inner sep=0pt, minimum size=4mm},
+    data/.style  = {font=\Large\ttfamily}
+}
+
+\tikzset{
+    % Your custom style, named 'bigblock'
+    bigblock/.style={
+        fill=blue!10,
+        rectangle,
+        draw=violet,
+        semithick,
+        inner sep=5pt,      % NOTE: I set this to 5pt. 0pt makes the text touch the border.
+        minimum height=1cm,
+        minimum width=1.5cm,  % NOTE: I set this to 1.5cm to comfortably fit "E_a".
+        rounded corners=1mm,
+    },
+    % Other styles from the previous version
+    blockdata/.style  = {draw, rectangle, minimum size=1.2cm, thick, fill=gray!10, font=\large\ttfamily},
+    key/.style   = {font=\small\ttfamily, fill=red!10, draw, rounded corners},
+    middle/.style = {draw, rectangle, rounded corners, minimum height=1.2cm, minimum width=1.5cm, thick, fill=green!15, font=\large\ttfamily},
+    arrow/.style = {-{Stealth[length=2.5mm]}, thick}
+}
+
+
+% --- A REUSABLE COMMAND FOR THE FEISTEL DIAGRAM (WITH EXPLICIT SWAP) ---
+\newcommand{\feisteldiagram}{%
+    \centering
+    % The >={...} option sets the default arrowhead for all paths drawn with ->
+    \begin{tikzpicture}[
+        node distance=1.5cm,
+        >={Stealth[length=2mm]} 
+    ]
+
+        % Place inputs
+        \node[data] (L0) at (0,0) {$L_i$};
+        \node[data] (R0) at (3,0) {$R_i$};
+        
+        % Place the F function and XOR at the middle level
+        \coordinate (midlevel) at (0, -2);
+        \node[bigblock] (F) at ($(L0)!0.5!(R0) + (midlevel)$) {$F$};
+        \node[xor] (XOR) at (F -| L0) {\Large $\oplus$};
+        
+        % Key input (moved slightly for better spacing)
+        \node[key, above=1cm of F] (Ki) {$K_{i}$};
+
+        % Place outputs (in their final, NON-swapped positions)
+        \coordinate (semifinallevel) at (0, -3);
+        \coordinate (Li11) at (semifinallevel -| L0);
+        \coordinate (Ri11) at (semifinallevel -| R0);
+
+        % Place outputs (in their final, NON-swapped positions)
+        \coordinate (finallevel) at (0, -5);
+        \node[data] (Li1) at (finallevel -| L0) {$L_{i+1}$};
+        \node[data] (Ri1) at (finallevel -| R0) {$R_{i+1}$};
+
+        % --- Draw the paths using -> to apply the default arrowhead ---
+        % Core round function paths
+        \draw[->] (L0.south) -- (XOR);
+        \draw[->] (F) -- (XOR);
+        \draw[arrow, dashed] (Ki) -- (F);
+
+
+        % --- The right-hand path and the EXPLICIT SWAP ---
+        % Define the corner where the right path turns to go to F
+        \coordinate (turnpoint) at (R0 |- F);
+        % Draw the vertical line from R_i to the turn point (no arrow)
+        \draw (R0.south) -- (turnpoint);
+        % Draw the horizontal line from the turn point into F (with arrow)
+        \draw[->] (turnpoint) -- (F);
+        
+        \draw[-] (XOR) -- (Li11);
+        \draw[-] (turnpoint) -- (Ri11);
+
+        % --- Draw the CROSSING/SWAP lines ---
+        % The right branch becomes the new Left branch
+        \draw[->] (Ri11) -- (Li1);
+        % The left (XORed) branch becomes the new Right branch
+        \draw[->] (Li11) -- (Ri1);
+    \end{tikzpicture}%
+}
+
 \begin{document}
 
 \maketitle
@@ -189,97 +260,345 @@
 \end{frame}
 %\cutoc
 
-
-\section{Feistel cipher with few interesting round functions} 
-
+\section{The Round Function of a Feistel Structure}
+% --- SLIDE 2: The Feistel Structure (Visual + Math) ---
 \begin{frame}
-\frametitle{Feistel cipher}
-\begin{definition}[ Encryption and Decryption]
-   Let $f_1,f_2,...,f_r$ be a round functions and let $k_1,...,k_r$ be sub-keys for the rounds $1,...,r$ respectively. Then to encrypt a message, split it into two equal parts: $(L_0,R_0)$ and for each round $i = 0,1,2,...,n-1$, compute
-   \begin{align*}
-   	L_{i+1} &= R_i\\
-   	R_{i+1} &= L_{i} + f_{i+1}(k_{i+1},R_i)
-   \end{align*}
-   The ciphertext is $(R_{n},L_{n})$
-	\par If the ciphertext is $(R_{n},L_{n})$, decryption is accomplished by computing for $i = n-1,...,1,0$
-	\begin{align*}
-	R_i &= L_{i+1}\\
-	L_{i} &=   R_{i+1} + f_{i+1}(k_{i+1},R_i)
-	\end{align*}
-	The ciphertext is $(L_{0},R_{0})$
-\end{definition}
-\end{frame}
-\begin{frame}
-	\frametitle{Round function $f_i(x) = 0$ for any $x$}
-	\begin{block}{}
-		What is the output of an $r$ round feistel cipher when the input is $(L_0, R_0)$ and each round function $f_i$ outputs $0$s for any input. 
-	\end{block}
-\pause
-Let us compute few rounds
-\begin{align*}
-	L_1 &= R_0\\
-	R_1 &= L_0 + 0 = L_0\\
-	L_2 &= R_1  = L_0\\
-	R_2 &= L_1  + 0 = L_1 = R_0\\
-	L_3 &= R_2  = R_0\\
-	R_3 &= L_2  + 0 = L_2 = L_0
-\end{align*}
-Thus if $r$ is even then $(L_0,R_0)$ and if $r$ is odd then $(R_0, L_0)$. 
+    \frametitle{The Feistel Structure}
+    \begin{columns}[c] % Vertically centered columns
+        \begin{column}{0.3\textwidth}
+            \feisteldiagram % Use our new command
+        \end{column}
+        
+        \begin{column}{0.6\textwidth}
+            \begin{block}{Encryption Round}
+                \begin{align*}
+                    L_{i+1} &= R_i \\
+                    R_{i+1} &= L_i \oplus F(K_{i}, R_i)
+                \end{align*}
+            \end{block}
+        \end{column}
+    \end{columns}
 \end{frame}
 
-\begin{frame}
-	\frametitle{Round function $f_i$ is an Identity function}
-	\begin{block}{}
-		What is the output of an $r$ round feistel cipher when the input is $(L_0, R_0)$ and each round function $f_i$ is the identity function.
-	\end{block}
-	\pause
-	Let us compute few rounds
-	\begin{align*}
-	L_1 &= R_0\\
-	R_1 &= L_0 + f_1(k_1,R_0) = L_0 + R_0\\
-	L_2 &= R_1  = L_0 + R_0\\
-	R_2 &= L_1  + f_2(k_2,R_1) = L_1 + R_1 = R_0 + (L_0+R_0) = L_0\\
-	L_3 &= R_2  = L_0\\
-	R_3 &= L_2  + f_3(k_3,R_2) = L_2 + R_2 = R_0
-	\end{align*}
-	\pause Thus after $3$ rounds, we get the input back.
+% --- SLIDE 3: Case 1 ---
+\begin{frame}[fragile]
+    \frametitle{Exploring Weak Functions}
+    \begin{columns}[T] % Top-aligned columns
+        \begin{column}{0.5\textwidth}
+            \feisteldiagram % The diagram remains
+        \end{column}
+        
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Case 1: The Zero Function}
+                What if $F(K, x) = 0 \forall x$?
+            \end{block}
+            
+            \pause
+            
+            \uncover<2->{$
+            \begin{aligned}[t]
+                L_1 &= R_0 \\ R_1 &= L_0 \oplus 0 = L_0 \\
+            \end{aligned}
+            $}
+
+            \uncover<3->{$
+            \begin{aligned}[t]
+                L_2 &= L_0  \\ R_2 &= R_0 \\
+            \end{aligned}
+            $}
+
+            \uncover<4->{
+            \begin{alertblock}{Result}
+                After an even number of rounds, you get the input back. \red{No security!}
+            \end{alertblock}}
+        \end{column}
+    \end{columns}
 \end{frame}
+
+% --- SLIDE 4: Case 2 ---
+\begin{frame}[fragile]
+    \frametitle{Exploring Weak Functions}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \feisteldiagram % The diagram remains
+        \end{column}
+        
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Case 2: The Identity Function}
+                What if $F(K, x) = x, \forall x$?
+            \end{block}
+            
+            \uncover<2->{$
+            \begin{aligned}[t]
+                L_1 &= R_0 \\ R_1 &= L_0 \oplus R_0 \\
+            \end{aligned}
+            $}
+
+            \uncover<3->{$
+            \begin{aligned}[t]
+                L_2 &= L_0 \oplus R_0 \\ R_2 &= R_0 \oplus (L_0 \oplus R_0) = L_0 \\
+            \end{aligned}
+            $}
+            
+            \uncover<4->{$
+            \begin{aligned}[t]
+                L_3 &= L_0 \\ R_3 &= (L_0 \oplus R_0) \oplus L_0 = R_0
+            \end{aligned}
+            $}
+            
+            \uncover<4->{
+            \begin{alertblock}{Result}
+                The input $(L_0, R_0)$ is restored after just 3 rounds. \red{No security!}
+            \end{alertblock}}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- SLIDE 5: Case 3 ---
+\begin{frame}[fragile]
+    \frametitle{Exploring Weak Functions}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \feisteldiagram % The diagram remains
+        \end{column}
+        
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Case 3: Simple XOR with Key}
+                What if $F(K, x) = K \oplus x \forall x$?
+            \end{block}
+            
+            \pause
+            \uncover<2->{$
+            \begin{aligned}[t]
+                L_1 &= R_0 \\
+                R_1 &= L_0 \oplus R_0 \oplus K_1 \\
+            \end{aligned}
+            $}
+            \uncover<3->{$
+            \begin{aligned}[t]
+                L_2 &= L_0 \oplus R_0 \oplus K_1 \\
+                R_2 &= R_0 \oplus (L_0 \oplus L_2) \oplus K_2 \\
+                   &= L_0 \oplus K_1 \oplus K_2
+            \end{aligned}
+            $}
+
+            \pause
+            
+            \uncover<3->{
+            \begin{alertblock}{Result}
+                The output is just a linear function of the input and keys. Broken with basic algebra. \red{No security!}
+            \end{alertblock}}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- SLIDE 6: Conclusion (No diagram needed here) ---
 \begin{frame}
-	\frametitle{Round function $f_i$ is XOR}
-	\begin{block}{}
-		What is the output of an $r$ round feistel cipher when the input is $(L_0, R_0)$ and each round function $f_i$ is defined as $f_i(k,x) = x + k$
-	\end{block}
-	\pause
-	Let us compute few rounds
-	\begin{align*}
-	L_1 &= R_0\\
-	R_1 &= L_0 + f_1(k_1,R_0) = L_0 + R_0 + k_1 \\
-	L_2 &= R_1  = L_0 + k_1 + R_0\\
-	R_2 &= L_1  + f_2(k_2,R_1) = R_0 + R_1 + k_2  = L_0 + k_1 + k_2\\
-	L_3 &= R_2  = L_0 + k_1 + k_2\\
-	R_3 &= L_2  + f_3(k_3,R_2) = L_2 + R_2 + k_3 = R_0 + k_2 + k_3
-	\end{align*}
-	\pause In general $L_r$ and $R_r$ is a linear function in $L_0,R_0$ and $k_1,k_2,...,k_r$. 
+    \frametitle{Conclusion: The Round Function is Everything}
+    
+    \begin{block}{Main Lesson}
+        A Feistel network is excellent \textbf{structure}, but its \textbf{round function} is everything.
+    \end{block}
+    
+    \begin{itemize}
+        \item<2-> Weak or simple $F$ functions lead to ciphers that are trivially broken.
+        \item<3-> A strong $F$ function must be \textbf{non-linear}
+    \end{itemize}
+    
 \end{frame}
 
 \section{Meet-in-the-middle}
 
+% --- SLIDE 2: Visualizing Double Encryption (The Forward Path) ---
 \begin{frame}
-	\frametitle{Double Encryption}
-	\begin{block}{}
-		Consider two block ciphers $E_b:\{0,1\}^m \times \{0,1\}^\ell \to \{0,1\}^\ell$ and $E_a:\{0,1\}^n \times \{0,1\}^\ell \to \{0,1\}^\ell$.
-		Given a plaintext $p$ and two encryption keys $k_1$ and $k_2$, a ciphertext can be generated as,
-		$$c = E_b(k_2, E_a(k_1,p))$$
-		To decrypt a ciphertext $c$ we apply the keys in reverse order as,
-		$$p = D_a(k_1, D_b(k_2,c)).$$
-	\end{block}
-	\pause
-Let us consider several plaintext-ciphertext pairs $(p_1,c_1),(p_2,c_2),...,(p_t,c_t)$, which are obtained using the key $(k_1,k_2)$ in double encryption. Then $E_a(k_1,p_i) = D_b(k_2,c_i)$ for all $1 \leq i \leq t$. 
+    \frametitle{Double Encryption}
+    
+    \begin{center}
+    \begin{tikzpicture}[node distance=1cm]
+        % Nodes
+        \node[data] (p) {$p$};
+        \node[bigblock, right=of p] (Ea) {$E^a$}; % Applied 'bigblock' style
+        \node[data, right=of Ea] (m) {$m$};
+        \node[bigblock, right=of m] (Eb) {$E^b$}; % Applied 'bigblock' style
+        \node[data, right=of Eb] (c) {$c$};
+        \node[key, above=1cm of Ea] (k1) {$K_1$};
+        \node[key, above=1cm of Eb] (k2) {$K_2$};
+        
+        % Arrows
+        \draw[arrow] (p) -- (Ea);
+        \draw[arrow] (Ea) -- (m);
+        \draw[arrow] (m) -- (Eb);
+        \draw[arrow] (Eb) -- (c);
+        \draw[arrow, dashed] (k1) -- (Ea);
+        \draw[arrow, dashed] (k2) -- (Eb);
+    \end{tikzpicture}
+    \end{center}
+    The Encryption Process:
+    \(c = E^b(K_2, \underbrace{E^a(K_1, p)}_{m}), \text{ where master-key }K = (K_1, K_2) \)
+\pause
+   \begin{center}
+    \begin{tikzpicture}[node distance=1cm]
+        % Nodes
+        \node[data] (p) {$p$};
+        \node[bigblock, right=of p] (Da) {$D^a$}; % Applied 'bigblock' style
+        \node[middle, right=of Da] (m) {$m$};
+        \node[bigblock, right=of m] (Db) {$D^b$}; % Applied 'bigblock' style
+        \node[data, right=of Db] (c) {$c$};
+        \node[key, above=1cm of Da] (k1) {$K_1$};
+        \node[key, above=1cm of Db] (k2) {$K_2$};
+        
+        % Arrows (in reverse)
+        \draw[arrow] (c) -- (Db);
+        \draw[arrow] (Db) -- (m);
+        \draw[arrow] (m) -- (Da);
+        \draw[arrow] (Da) -- (p);
+        \draw[arrow, dashed] (k2) -- (Db);
+        \draw[arrow, dashed] (k1) -- (Da);
+    \end{tikzpicture}
+    \end{center}
+
 \end{frame}
+
+% --- SLIDE: The Core Meet-in-the-Middle Condition ---
 \begin{frame}
-	\frametitle{Double DES: Meet-in-the-middle}
-	\includegraphics[width=0.8\textwidth]{./fig/meetinmi.png}
+    \frametitle{The Filtering Condition}
+    
+    \begin{center}
+    \begin{tikzpicture}[
+        key_box/.style={draw=red, thick, rectangle, rounded corners, fill=red!10, font=\large\ttfamily},
+    ]
+    
+        % --- The single, unknown key pair we are looking for ---
+        \node[key_box] (K) at (0, 1.5) {$(K_1, K_2)$};
+    
+        % --- The known plaintext/ciphertext pairs ---
+        \node[data] (p1) at (-4, 0) {$p_1$};
+        \node[data] (c1) at (4, 0)  {$c_1$};
+        \node[middle] (m1) at (0, 0) {$m_1$};
+        
+        \uncover<2->{
+        \node[data] (p2) at (-4, -2) {$p_2$};
+        \node[data] (c2) at (4, -2)  {$c_2$};
+        \node[middle] (m2) at (0, -2) {$m_2$};
+
+        \node[font=\Large] at (-4, -3.2) {$\vdots$};
+        \node[font=\Large] at (4, -3.2) {$\vdots$};
+        \node[font=\Large] at (0, -3.2) {$\vdots$};
+        }
+
+        % --- The arrows representing the condition ---
+        \draw[->, thick, blue] (p1) -- (m1) node[midway, above, font=\small] {$E^a$};
+        \draw[<-, thick, red] (c1) -- (m1) node[midway, above, font=\small] {$D^b$};
+
+        \uncover<2->{
+        \draw[->, thick, blue] (p2) -- (m2) node[midway, above, font=\small] {$E^a$};
+        \draw[<-, thick, red] (c2) -- (m2) node[midway, above, font=\small] {$D^b$};
+        }
+        
+        % --- Dashed lines showing the key's influence ---
+        \draw[->, dashed, red!80] (K) to[bend right=15] (p1.north);
+        \draw[->, dashed, red!80] (K) to[bend left=15] (c1.north);
+        \uncover<2->{
+        \draw[->, dashed, red!80] (K) to[bend right=10] (p2.north);
+        \draw[->, dashed, red!80] (K) to[bend left=10] (c2.north);
+        }
+
+    \end{tikzpicture}
+    
+    \uncover<3->{
+        The Constraint: \(E^a(K_1, p_i) = \red{m_i} = D^b(K_2, c_i) \quad \text{for all } i=1, 2, \dots, t\)
+    }
+
+    \end{center}
 \end{frame}
+
+% --- SLIDE: The Meet-in-the-Middle Algorithm (FINAL CORRECTION) ---
+% \begin{frame}
+%     \frametitle{The Attack Algorithm in Action}
+    
+%     \begin{columns}[T] % Top-aligned columns
+    
+%         % --- LEFT COLUMN: Steps 1 & 2 ---
+%         \begin{column}{0.5\textwidth}
+%             \centering
+%             \textbf{Step 1: Build Forward Table}
+            
+%             \begin{tikzpicture}[
+%                 node distance=0.8cm,
+%                 table_node/.style={draw, rectangle, fill=blue!5}
+%             ]
+%                 \node[data] (p) {$(p_1, c_1)$};
+%                 \node[bigblock, below=of p] (Ea) {Encrypt with \\ all possible $k_a$};
+                
+%                 \uncover<2->{
+%                 % The table T1
+%                 \node[table_node, below=of Ea] (T1) {
+%                     \small
+%                     \begin{tabular}{c|c}
+%                         \multicolumn{2}{c}{\textbf{Table $T_1$}} \\ \hline
+%                         \textbf{Value} & \textbf{Key} \\ \hline
+%                         $m_{a1}$ & $k_{a1}$ \\
+%                         $m_{a2}$ & $k_{a2}$ \\
+%                         \dots & \dots \\
+%                         \uncover<5->{\tikz[overlay]{\node[fit=(mMatchNode)(kMatchNode), draw=red, thick, rounded corners] {};}}
+%                         \node (mMatchNode) {$m_{ax}$}; & \node (kMatchNode) {$k_{ax}$}; \\
+%                         \dots & \dots \\
+%                         $m_{aN}$ & $k_{aN}$ \\
+%                     \end{tabular}
+%                 };
+                
+%                 \draw[arrow] (p) -- (Ea);
+%                 \draw[arrow] (Ea) -- (T1);
+%                 }
+                
+%                 \uncover<3->{
+%                 \node[left=0.2cm of T1, draw, dashed, rounded corners, fill=yellow!20] (sort) {\textbf{Step 2: Sort $T_1$}};
+%                 }
+%             \end{tikzpicture}
+%         \end{column}
+        
+%         % --- RIGHT COLUMN: Steps 3 & 4 ---
+%         \begin{column}{0.5\textwidth}
+%             \centering
+%             \uncover<4->{
+%             \textbf{Step 3: Search from Backward}
+            
+%             \begin{tikzpicture}[node distance=0.8cm]
+%                 \node[data] (c) {$(p_1, c_1)$};
+%                 \node[bigblock, below=of c] (Db) {For each $k_b$, \\ Decrypt $c_1$};
+                
+%                 % ***** THIS WAS THE LINE CAUSING THE ERROR *****
+%                 % CORRECTED: The '*' must be inside math mode.
+%                 \node[middle, below=of Db] (target) {Target Value $m^*$};
+                
+%                 \draw[arrow] (c) -- (Db);
+%                 \draw[arrow] (Db) -- (target);
+                
+%                 \uncover<5->{
+%                 \node[key_candidate, below=2cm of target] (candidate) {Candidate: $(k_{ax}, k_b)$};
+%                 \draw[arrow, dashed] (Db) -- (candidate);
+%                 }
+%             \end{tikzpicture}
+%             }
+%         \end{column}
+    
+%     \end{columns}
+    
+%     % --- Arrow connecting the two sides ---
+%     \uncover<5->{
+%     \begin{tikzpicture}[overlay, remember picture]
+%         \node (L) at (current page.west) {};
+%         \node (R) at (current page.east) {};
+        
+%         \path (L) -- (R) node[midway, below=4cm] (searchLabelNode) {\textbf{Step 4: Find a Match}};
+%         \draw[arrow, red, thick, bend right] 
+%             (searchLabelNode.west -| R) ++(-4.5, 0.5)
+%             to (searchLabelNode.east -| L) ++(4.5, 0.5);
+%     \end{tikzpicture}
+%     }
+    
+% \end{frame}
+
 \begin{frame}
 	\frametitle{Double encryption: Meet-in-the-middle}
 	Consider a plaintext-ciphertext pair $(p_1,c_1)$.
