@@ -421,8 +421,8 @@
         \node[data, right=of Ea] (m) {$m$};
         \node[bigblock, right=of m] (Eb) {$E^b$}; % Applied 'bigblock' style
         \node[data, right=of Eb] (c) {$c$};
-        \node[key, above=1cm of Ea] (k1) {$K_1$};
-        \node[key, above=1cm of Eb] (k2) {$K_2$};
+        \node[key, above=1cm of Ea] (k1) {$K^a$};
+        \node[key, above=1cm of Eb] (k2) {$K^b$};
         
         % Arrows
         \draw[arrow] (p) -- (Ea);
@@ -434,7 +434,7 @@
     \end{tikzpicture}
     \end{center}
     The Encryption Process:
-    \(c = E^b(K_2, \underbrace{E^a(K_1, p)}_{m}), \text{ where master-key }K = (K_1, K_2) \)
+    \(c = E^b(K^b, \underbrace{E^a(K^a, p)}_{m}), \text{ where master-key }K = (K^a, K^b) \)
 \pause
    \begin{center}
     \begin{tikzpicture}[node distance=1cm]
@@ -444,8 +444,8 @@
         \node[middle, right=of Da] (m) {$m$};
         \node[bigblock, right=of m] (Db) {$D^b$}; % Applied 'bigblock' style
         \node[data, right=of Db] (c) {$c$};
-        \node[key, above=1cm of Da] (k1) {$K_1$};
-        \node[key, above=1cm of Db] (k2) {$K_2$};
+        \node[key, above=1cm of Da] (k1) {$K^a$};
+        \node[key, above=1cm of Db] (k2) {$K^b$};
         
         % Arrows (in reverse)
         \draw[arrow] (c) -- (Db);
@@ -469,7 +469,7 @@
     ]
     
         % --- The single, unknown key pair we are looking for ---
-        \node[key_box] (K) at (0, 1.5) {$(K_1, K_2)$};
+        \node[key_box] (K) at (0, 1.5) {$(K^a, K^b)$};
     
         % --- The known plaintext/ciphertext pairs ---
         \node[data] (p1) at (-4, 0) {$p_1$};
@@ -506,337 +506,262 @@
     \end{tikzpicture}
     
     \uncover<3->{
-        The Constraint: \(E^a(K_1, p_i) = \red{m_i} = D^b(K_2, c_i) \quad \text{for all } i=1, 2, \dots, t\)
+        The Constraint: \(E^a(K^a, p_i) = \red{m_i} = D^b(K^b, c_i) \quad \text{for all } i=1, 2, \dots, t\)
     }
 
     \end{center}
 \end{frame}
 
-% --- SLIDE: The Meet-in-the-Middle Algorithm (FINAL CORRECTION) ---
-% \begin{frame}
-%     \frametitle{The Attack Algorithm in Action}
+% --- SLIDE: Meet-in-the-Middle Attack Algorithm ---
+\begin{frame}
+    \frametitle{Meet-in-the-Middle Attack}
     
-%     \begin{columns}[T] % Top-aligned columns
-    
-%         % --- LEFT COLUMN: Steps 1 & 2 ---
-%         \begin{column}{0.5\textwidth}
-%             \centering
-%             \textbf{Step 1: Build Forward Table}
-            
-%             \begin{tikzpicture}[
-%                 node distance=0.8cm,
-%                 table_node/.style={draw, rectangle, fill=blue!5}
-%             ]
-%                 \node[data] (p) {$(p_1, c_1)$};
-%                 \node[bigblock, below=of p] (Ea) {Encrypt with \\ all possible $k_a$};
-                
-%                 \uncover<2->{
-%                 % The table T1
-%                 \node[table_node, below=of Ea] (T1) {
-%                     \small
-%                     \begin{tabular}{c|c}
-%                         \multicolumn{2}{c}{\textbf{Table $T_1$}} \\ \hline
-%                         \textbf{Value} & \textbf{Key} \\ \hline
-%                         $m_{a1}$ & $k_{a1}$ \\
-%                         $m_{a2}$ & $k_{a2}$ \\
-%                         \dots & \dots \\
-%                         \uncover<5->{\tikz[overlay]{\node[fit=(mMatchNode)(kMatchNode), draw=red, thick, rounded corners] {};}}
-%                         \node (mMatchNode) {$m_{ax}$}; & \node (kMatchNode) {$k_{ax}$}; \\
-%                         \dots & \dots \\
-%                         $m_{aN}$ & $k_{aN}$ \\
-%                     \end{tabular}
-%                 };
-                
-%                 \draw[arrow] (p) -- (Ea);
-%                 \draw[arrow] (Ea) -- (T1);
-%                 }
-                
-%                 \uncover<3->{
-%                 \node[left=0.2cm of T1, draw, dashed, rounded corners, fill=yellow!20] (sort) {\textbf{Step 2: Sort $T_1$}};
-%                 }
-%             \end{tikzpicture}
-%         \end{column}
+    \begin{center}
+    \begin{tikzpicture}[
+        node distance=1.2cm,
+        middle/.style={draw=none, font=\large\ttfamily},
+        table_box/.style={draw=red, thick, rectangle, rounded corners, fill=red!5, inner sep=8pt},
+        key_candidate/.style={draw=green, thick, rectangle, rounded corners, fill=green!10, inner sep=2pt, text width=8cm, align=center},
+        arrow_style/.style={-{Stealth[length=2.5mm]}, thick},
+        key_label/.style={font=\small\ttfamily, fill=white, inner sep=2pt, draw=none}
+    ]
         
-%         % --- RIGHT COLUMN: Steps 3 & 4 ---
-%         \begin{column}{0.5\textwidth}
-%             \centering
-%             \uncover<4->{
-%             \textbf{Step 3: Search from Backward}
-            
-%             \begin{tikzpicture}[node distance=0.8cm]
-%                 \node[data] (c) {$(p_1, c_1)$};
-%                 \node[bigblock, below=of c] (Db) {For each $k_b$, \\ Decrypt $c_1$};
-                
-%                 % ***** THIS WAS THE LINE CAUSING THE ERROR *****
-%                 % CORRECTED: The '*' must be inside math mode.
-%                 \node[middle, below=of Db] (target) {Target Value $m^*$};
-                
-%                 \draw[arrow] (c) -- (Db);
-%                 \draw[arrow] (Db) -- (target);
-                
-%                 \uncover<5->{
-%                 \node[key_candidate, below=2cm of target] (candidate) {Candidate: $(k_{ax}, k_b)$};
-%                 \draw[arrow, dashed] (Db) -- (candidate);
-%                 }
-%             \end{tikzpicture}
-%             }
-%         \end{column}
-    
-%     \end{columns}
-    
-%     % --- Arrow connecting the two sides ---
-%     \uncover<5->{
-%     \begin{tikzpicture}[overlay, remember picture]
-%         \node (L) at (current page.west) {};
-%         \node (R) at (current page.east) {};
+        % ===== TOP: Input Pair =====
+        \node[data] (inputP) at (-5, 5.5) {$p_1$};
+        \node[data] (inputC) at (5, 5.5) {$c_1$};
         
-%         \path (L) -- (R) node[midway, below=4cm] (searchLabelNode) {\textbf{Step 4: Find a Match}};
-%         \draw[arrow, red, thick, bend right] 
-%             (searchLabelNode.west -| R) ++(-4.5, 0.5)
-%             to (searchLabelNode.east -| L) ++(4.5, 0.5);
-%     \end{tikzpicture}
-%     }
-    
-% \end{frame}
+        % ===== LEFT SIDE: Forward Path =====
+        \uncover<2->{
+            % The encryption function
+            \node[bigblock] (encryptEa) at (-5, 4) {$E^a$};
+            
+            % Arrow from plaintext to encryption
+            \draw[arrow_style, blue] (inputP) -- (encryptEa);
+            
+            % Intermediate values as outputs
+            \node[middle] (intVal1) at (-6.5, 1) {$m^a_1$};
+            \node[middle] (intVal2) at (-5, 1) {$m^a_2$};
+            \node[middle] (intVal3) at (-3.5, 1) {$m^a_3$};
+            \node[font=\Large] (intValDots) at (-1.5, 1.5) {\dots};
+            
+            % Output arrows
+            \draw[arrow_style, blue] (encryptEa.south) to[bend left=25] (intVal1);
+            \draw[arrow_style, blue] (encryptEa.south) to[bend left=10] (intVal2);
+            \draw[arrow_style, blue] (encryptEa.south) to[bend left=0] (intVal3);
+            \draw[arrow_style, blue] (encryptEa.south) to[bend right=10] (intValDots);
+            
+            % Key labels positioned next to the arrows
+            \node[key_label] at (-5.3, 2) {$K^a_1$};
+            \node[key_label] at (-4.8, 2.5) {$K^a_2$};
+            \node[key_label] at (-4, 2) {$K^a_3$};
+            \node[key_label] at (-1.3, 2.5) {\dots};
+        }
+        
+        % ===== MIDDLE: Table T_1 =====
+        \uncover<3->{
+            \node[table_box] (tableT1) at (0.5, 2) {
+                \scriptsize
+                \begin{tabular}{|c|c|}
+                    \hline
+                    \blue{Value} & \blue{Key} \\ \hline
+                    $m^a_1$ & $K^a_1$ \\ \hline
+                    $m^a_2$ & $K^a_2$ \\ \hline
+                    $m^a_3$ & $K^a_3$ \\ \hline
+                    \dots & \dots \\ \hline
+                \end{tabular}
+            };
+            
+            \node[above=0.2cm of tableT1, font=\small\bfseries] {$T_1$};
+        }
+        
+        % ===== RIGHT SIDE: Backward Path =====
+        \uncover<4->{
+            % The decryption function
+            \node[bigblock] (decryptDb) at (5, 4) {$D^b$};
+            
+            % Arrow from ciphertext to decryption
+            \draw[arrow_style, red] (inputC) -- (decryptDb);
+            
+            % Target values as outputs
+            \node[middle] (decVal1) at (3.5, 1.5) {$m^b_1$};
+            \node[middle] (decVal2) at (5, 1.5) {$m^b_2$};
+            \node[middle] (decVal3) at (6.5, 1.5) {$m^b_3$};
+            \node[font=\Large] (decValDots) at (8.5, 1.5) {\dots};
+            
+            % Output arrows
+            \draw[arrow_style, red] (decryptDb.south) to[bend right=25] (decVal1);
+            \draw[arrow_style, red] (decryptDb.south) to[bend right=10] (decVal2);
+            \draw[arrow_style, red] (decryptDb.south) to[bend right=0] (decVal3);
+            
+            % Key labels positioned next to the arrows
+            \node[key_label] at (4, 2.5) {$K^b_1$};
+            \node[key_label] at (4.8, 2.5) {$K^b_2$};
+            \node[key_label] at (5.8, 2.5) {$K^b_3$};
+            \node[key_label] at (8.7, 2.5) {\dots};
+        }
+        
+        % ===== STEP 4: Search and Match =====
+        \uncover<5->{
+            \draw[arrow_style, thick, dashed, purple, bend right=30] (decVal1) to (tableT1.east);
+            \node[midway, right=0.3cm, font=\small, color=purple] {\textbf{Search}};
+            
+            \node[key_candidate, below=0.5cm of tableT1] (resultKey) {
+                If $m^a_i = m^b_j$ for some $(i,j)$:\\ \bfseries Match Found! 
+                Candidate Key:
+                $(K^a_i, K^b_j)$
+            };
+            
+            \draw[arrow_style, thick, purple] (tableT1.south) -- (resultKey.north);
+        }
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
 
 \begin{frame}
-	\frametitle{Double encryption: Meet-in-the-middle}
+	\frametitle{Meet-in-the-middle (cont.)}
 	Consider a plaintext-ciphertext pair $(p_1,c_1)$.
 	\begin{enumerate}
 		\item Construct a table $T_1$ with rows of the form 
-		$(c,k_a), \text{ where } E_a(k_a,p_1) = c.$
-		\item Sort the table $T_1$ by first element.
-		\item For every $k_b$, search for $D_b(k_b,c_1)$ in $T_1$.
-		\item If there is a match and $k_a$ is the second element, then we have a candidate key $(k_a,k_b)$
+		$(m,K^a), \text{ where } E^a(K^a,p_1) = m$
+		\item Sort the table $T_1$ by first element
+		\item For every $K^b$, search for $D^b(K^b,c_1)$ in $T_1$.
+        \item \red{Match} $\implies$ we have a candidate key $K = (K^a,K^b)$
 	\end{enumerate}
-	\includegraphics[width=0.8\textwidth]{./fig/meetinmi1.png}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Double Encryption: Meet-in-the-middle}
-	\begin{block}{Complexity of the attack}
-		Time complexity: $n2^{m}$\\
-		Space complexity: $\ell 2^n$
+    \pause
+    \begin{block}{Complexity of the attack}
+		Time complexity: $O(n2^{n})$ and Memory complexity: $O(n 2^n)$
 		\begin{enumerate}
-			\item $2^{m}:$ Compute $D_{k_b}$ for every $k_b$
-			\item $n2^m:$ To sort the table $T_1$.
-			\item $2^n(n+\ell):$ Size of the table $T_1$
+			\item $2^{n}:$ Compute $E^a$ for every $K^a$
+			\item $n2^n:$ To sort the table $T_1$.
+			\item $2^n(n+n):$ Size of the table $T_1$
 		\end{enumerate}
 	\end{block}
 \end{frame}
+
 \begin{frame}
-	\frametitle{Double DES: Meet-in-the-middle}
-	\begin{block}{}
-	Meet-in-the-middle attack exploit the equation $E_a(k_1,p_i) = D_b(k_2,c_i)$ which holds for any $(p_i,c_i)$.\\
-	What is the expected number of keys $(k_1,k_2)$ such that $E_a(k_1,p_i) = D_b(k_2,c_i)$ holds for $t$ pairs of $(p_i,c_i)$?
-	\end{block}
+	\frametitle{Meet-in-the-middle (Success Probability)}
 	\begin{enumerate}
-		\item Suppose we fix $p$ and choose a random $k_1$. Then $\Pr[E_a(k_1,p) = z] = 2^{-|k_1|}$ for all $z$.
-		\item Similarly, if we fix $c$ and choose a random $k_2$. Then $\Pr[D_b(k_2,c) = z] = 2^{-|k_2|} = 2^{-|k_1|}$ for all $z$ (assume $|k_1| = |k_2|$).
-		\item Thus $\Pr[E_a(k_1,p) = D_b(k_2,c)] = 2^{-|k_1|}$.
-		\item If we consider $t$ pairs, then the above equation holds for all pairs with probability $2^{-t|k_1|}$.
-		\item As there are total $2^{2|k_1|}$ possible keys, the expected number of keys is $2^{2|k_1|-t|k_1|}$.
+        \item The Constraint: \(E^a(K^a, p_i) = \red{m_i} = D^b(K^b, c_i), \quad \forall i=1, 2, \dots, t\)
+        \pause
+        \item What is the expected number of keys $(K^a,K^b)$ s.t. 
+            \begin{itemize}
+                \item \(E^a(K^a, p_i) = \red{m_i} = D^b(K^b, c_i), \quad \forall i=1, 2, \dots, t\)
+            \end{itemize}
+        \pause
+		\item For fixed $p$ and a random $K^a$, $\Pr\left(E_a(K^a,p) = z\right) = 2^{\kappa}$ for any fixed $z$
+		\item Similarly, for fixed $c$ and a random $K^b$ $\Pr\left(D^b(K^b,c\right) = z] = 2^{-\kappa}$ for any $z$
+        \pause
+		\item Thus $\Pr\left(E^a(K^a,p) = D^b(K^b,c)\right) = 2^{-\kappa}$.
+        \pause
+    \item The above equation holds for all $t$ pairs has probability $2^{-t\kappa}$.
+		\item As there are total $2^{2\kappa}$ possible keys, the expected number of keys is $2^{2\kappa - t\kappa}$.
 	\end{enumerate}
-\end{frame}
-\begin{frame}
-	\frametitle{Modified DES: Meet-in-the-middle}
-	\begin{block}{}
+    \pause
+    \begin{block}{Modified DES}
 		Say the key schedule of DES is modiﬁed as follows: the left half of the
 		master key is used to derive all the sub-keys in rounds 1–8, while the
 		right half of the master key is used to derive all the sub-keys in rounds
 		9–16.
 	\end{block}
-	\pause
-	\begin{enumerate}
-		\item Use the encryption oracle to obtain plaintext-ciphertext pair $(p_1,c_1),(p_2,c_2),(p_3,c_3).$
-		\item Construct a sorted table $T_1$ with rows of the form 
-		$(c,k_a), \text{ where } E^{\prime}_{k_a}(p_1) = c.$
-		Here $E^{\prime}$ is $8$-round DES encryption.	
-		\item Similarly, construct another sorted table $T_2$ with rows of the form 
-		$(p,k_b), \text{ where } D^{\prime}_{k_b}(c_1) = p.$
-		Here $D^{\prime}$ is $8$-round DES decryption.
-		\item If there is a match, then we have a candidate key $(k_a,k_b)$
-		\item We can use other two pairs for verification. 
-	\end{enumerate}
 \end{frame}
-\begin{frame}
-	\frametitle{Attack on Triple Encryption}
-		Let $f$ be an $\ell$-bit block cipher. Define Triple Encryption as $F_{k_1,k_2}(p) = f_{k_1}(f^{-1}_{k_2}(f_{k_1}(p))) $
-		\begin{enumerate}
-			\item Suppose for any $(m_1,m_2)$, it is possible to find in constant time all keys $k_2$ such that $m_2 = f^{-1}_{k_2}(m_1)$. 
-			\begin{enumerate}
-				\item Can you recover the full key of $F_{k_1,k_2}$ using three plaintext-ciphertext pair?
-				\item What is the time complexity?
-			\end{enumerate}
-		\end{enumerate}
-	
-\end{frame}
-\begin{frame}
-	\frametitle{Attack on Triple Encryption}
-	\begin{enumerate}
 
+% --- SLIDE: Triple Encryption ---
+\begin{frame}
+    \frametitle{Meet-in-the-middle Attack on Triple Encryption}
+    \begin{center}
+    \begin{tikzpicture}[
+        key_input/.style={draw=orange, rounded rectangle, inner sep=5pt, font=\small\ttfamily, fill=orange!10},
+        arrow_style/.style={-{Stealth[length=1.5mm]}, thick}
+    ]
+
+        % ===== Input Plaintext =====
+        \node[data] (plaintext) at (0, 0) {$p$};
+
+        % ===== First Encryption (E^a with K^a_1) =====
+        \node[bigblock] (Ea1) at (2, 0) {$E^a$};
+        \node[key, above=0.5cm of Ea1] (Ka1) {$K^a$};
+
+        \draw[arrow_style, blue] (plaintext) -- (Ea1);
+        \draw[arrow_style, orange] (Ka1) -- (Ea1);
+
+        % ===== First Intermediate Value =====
+        \node[data] (m1) at (4, 0) {$m_1$};
+        \draw[arrow_style, blue] (Ea1) -- (m1);
+
+        % ===== Second Encryption (E^b with K^b) =====
+        \node[bigblock] (Eb) at (6, 0) {$E^b$};
+        \node[key, above=0.5cm of Eb] (Kb) {$K^b$};
+
+        \draw[arrow_style, blue] (m1) -- (Eb);
+        \draw[arrow_style, orange] (Kb) -- (Eb);
+
+        % ===== Second Intermediate Value =====
+        \node[data] (m2) at (8, 0) {$m_2$};
+        \draw[arrow_style, blue] (Eb) -- (m2);
+
+        % ===== Third Encryption (E^a with K^a_2) =====
+        \node[bigblock] (Ea2) at (10, 0) {$E^a$};
+        \node[key, above=0.5cm of Ea2] (Ka2) {$K^a$};
+
+        \draw[arrow_style, blue] (m2) -- (Ea2);
+        \draw[arrow_style, orange] (Ka2) -- (Ea2);
+
+        % ===== Output Ciphertext =====
+        \node[data] (ciphertext) at (12, 0) {$c$};
+        \draw[arrow_style, blue] (Ea2) -- (ciphertext);
+    \end{tikzpicture}
+    \end{center}
+\pause
+\begin{enumerate}
+    \item \green{Suppose for any $(m_1,m_2)$, it is possible to find in constant time all keys $K$ such that $m_2 = E^b(K, m_1)$}
+    \begin{enumerate}
+        \item Can you recover the full key of ${K^a,K^b}$ using three plaintext-ciphertext pair?
+        \item What is the time complexity?
+    \end{enumerate}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Attack on Triple Encryption}
+	\begin{enumerate}
 		\item Let $(p_1,c_1),(p_2,c_2),(p_3,c_3)$ be three collected plaintext-ciphertext pairs.
-		\item Initialize a set $K_{g} = \phi$. Then for every key $k_a$ do the followings:
+		\item Initialize a set $K_{g} = \phi$. Then for every key $K^a$ do the followings:
 		\begin{enumerate}
-			\item Compute $m_1 = f_{k_a}(p_1)$ and $m_2 = f^{-1}_{k_a}(c_1)$
-			\item Find the set $S$ of all keys $k_{b}$ such that $m_2 = f^{-1}_{k_b}(m_1)$ (it takes constant time).
-			\item For every $k_b \in S$ do: if $c_2 = F_{k_a,k_b}(p_2)$ and  $c_3 = F_{k_a,k_b}(p_3)$ then $K_g = K_g \cup \{(k_a,k_b)\}$.
+			\item Compute $m_1 = E^a(K^a, p_1)$ and $m_2 = D^a(K^a, c_1)$
+            \pause
+            \item \green{Find the set $S$ of all keys $K^{b}$ such that $m_2 = E^b(K^b, m_1)$ (it takes constant time).}
+            \pause
+			\item For every $K^b \in S$: if $c_2 = E_{K^a, K^b}(p_2)$ and $c_3 = F_{K^a, K^b}(p_3)$ then $K_g = K_g \cup \{(K^a,K^b)\}$.
 		\end{enumerate}
 	\end{enumerate}
+    \pause
+    \begin{block}{Complexity of the attack}
+        \begin{enumerate}
+		    \item The outer loop runs for $2^{\kappa}$
+            \item Running time of the inner loop is linear in $|S|$
+            \pause
+            \item What is the probability that an incorrect key will be in $K_g$?
+		    \item We expect that $|S| \approx 1$, so total running time is $2^n$
+        \end{enumerate}
+    \end{block}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Attack on Triple Encryption}
-	Let us compute the running time.
-	\begin{enumerate}
-		\item The outer loop runs for $2^{|k_1|}$
-		\item Running time of the loop is linear in $|S|$
-		\item We expect that in each loop, only one key is in $S$, so total running time is $2^n$
-		\item What is the probability that an incorrect key will be in $K_g$? ($2^{-n}$) 
-	\end{enumerate}
-	However, finding $k_2$ in constant time may not be possible.
-	\pause
-	Using $2^n$ preprocessing time we can construct a table $T$ containing rows of the form $(m_2,k_2)$ where $m_2 = f^{-1}_{k_2}(0^n)$ and sort the table by $m_2$
-\end{frame}
-
-\begin{frame}
-	\frametitle{Attack on Triple Encryption}
-	We can use the table $T$ as follows:
+    \red{Construct $T$ containing rows of the form $(m_2,k_2)$ where $m_2 = E^b(K^b, 0^n)$ and sort the table by $m_2$. (Preprocessing time: $n2^n$)}
+\pause
 	First collect two plaintext-ciphertext pairs $(p_2,c_2),(p_3,c_3)$.
-	Initialize a set $K_{g} = \phi$. Then for every key $k_a$ do the followings:
+	Initialize a set $K_{g} = \phi$. Then for every key $K^a$ do the followings:
+    \pause
 	\begin{enumerate}
-		\item Compute $p_1 = f^{-1}_{k_a}(0^n)$ and ask for an encryption of $p_1$ to $F_{k_1,k_2}$; Let the result be $c_1$
-		\item Compute $m_1 = f_{k_a}(p_1)$ and $m_2 = f^{-1}_{k_a}(c_1)$
-		\item From table $T$, we find the row with first element $m_2$ and we consider the second element.
-		\item If the second element is $k_b$, do: if $c_2 = F_{k_a,k_b}(p_2)$ and  $c_3 = F_{k_a,k_b}(p_3)$ then $K_g = K_g \cup \{(k_a,k_b)\}$.
+		\item Compute $p_1 = D^a(K^a, 0^n)$ and ask for an encryption of $p_1$ to $F_{K^a, K^b}$
+		\item Let the result be $c_1$ and $m_2 = f^{-1}_{k_a}(c_1)$
+        \pause
+		\item From table $T$, we find the row with first element $m_2$
+		\item If the second element is $K^b$, check other two pairs of data with $(K^a, K^b)$
 	\end{enumerate}
 {\color{red} What is the complexity of the whole attack?}
-\end{frame}
-
-\section{Iterated Hash Functions}
-
-\begin{frame}
-\frametitle{Hash Functions}
-\begin{enumerate}
-	\item A cryptographic hash function takes a "long`` input string and produces a random looking "short`` output string of fixed length.
-	$$\h:\{0,1\}^* \to \{0,1\}^n.$$
-\end{enumerate}
-\begin{block}{Security Properties}
-	\begin{enumerate}
-        \item {\bf \red{Collision resistance:}} Difficult to find $x_1,x_2 \in \{0,1\}^*$ such that $x_1 \neq x_2 ~\wedge~\h(x_1)=\h(x_2) $
-        \item {\bf \red{Preimage resistance:}} Given $h\in \{0,1\}^n$, it is difficult to find $x\in \{0,1\}^*$ such that $\h(x)=h$
-        \item {\bf \red{Second Preimage resistance:}} Given $x_1 \in \{0,1\}^*$, it is difficult to find $x_2\in \{0,1\}^*$ such that $x_1 \neq x_2 ~\wedge~\h(x_1)=\h(x_2) $.
-	\end{enumerate}
-\end{block}
-\end{frame}
-\begin{frame}
-	\frametitle{Iterated Hash Function}
-	\begin{block}{Iterated Hash Function}
-		\begin{enumerate}
-			\item Given a compression function $\mathcal{C}:\{0,1\}^{n+m} \to \{0,1\}^n$ and some padding function.
-            \item {\bf \red{Preprocessing step:}} Given a message $x \in \{0,1\}^*$, construct a padded string $y = y_1\|y_2\|\cdots\|y_\ell$.
-            \item {\bf \red{Processing step:}} Compute iterated hash output:
-			\begin{align*}
-				z_0 & \leftarrow IV\\
-				z_1 & \leftarrow \mathcal{C}(z_0 \| y_1)\\
-				z_1 & \leftarrow \mathcal{C}(z_0 \| y_1)\\
-				\vdots& \\
-				z_\ell &\leftarrow \mathcal{C}(z_{\ell - 1}\|y_{\ell}).
-			\end{align*}
-		\item Output $\h(x)=z_{\ell}$.
-		\end{enumerate}
-	\end{block}
-\end{frame}
-
-\section{Multi-collisons in Hash functions}
-\begin{frame}
-	\frametitle{Multi-collisons in Hash functions}
-\begin{block}{Multi-collisons in Hash functions}
-	\begin{enumerate}
-        \item {\bf \red{$t$-multi-collision:}} The problem is to find $t$ different $x_1,x_2,...,x_t \in \{0,1\}^*$ such that $\h(x_1)=\h(x_2)=\cdots=\h(x_t) = y.$\\
-		The common output value, $y$, is called the \emph{collision value}.
-		\pause
-		\item Is it harder to find \red{$t$-multi-collision} than one \red{collision}?
-		\pause
-		\begin{enumerate}
-			\item When \red{iterated} hash functions are involved, this intuition is false.
-		\end{enumerate}
-		\pause
-	\end{enumerate}
-\end{block}
-\pause
-\begin{block}{}
-	\begin{enumerate}
-		\item Suppose we have an algorithm $\mathsf{A}$ that can takes one chaining value $z$ as input and finds two block $B^0 \neq B^1$ such that $$\mathcal{C}(z\|B^0) = \mathcal{C}(z\|B^1).$$
-		\item We use this $\mathsf{A}$ to find multiple collisions.
-	\end{enumerate}
-\end{block}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Multi-collisons in Hash functions}
-	\begin{block}{Attack Algorithm}
-	The attack works as follows:
-		\begin{enumerate}
-			\item Set $z_0 = IV$
-			\item for $i = 1$ to $t$:
-				\begin{enumerate}
-					\item Call $\mathsf{A}$ to find $B_i^0 \neq B_i^1$ such that $\mathcal{C}(z_{i-1}\|B^0) = \mathcal{C}(z_{i-1}\|B^1)$
-					\item let $z_i = \mathcal{C}(z_{i-1},B_i^0)$
-				\end{enumerate}
-			\item Pad (if necessary) and output $2^t$ messages of the form $$(B_1^{b_1}\|B_2^{b_2}\|\cdots\|B_{t}^{b_t}) \text{ where each } b_i \in \{0,1\}$$
-		\end{enumerate}
-	\end{block}
-\pause
-\includegraphics[scale=0.4]{./fig/joux.png}
-\pause
-Complexity: Running $\mathsf{A}$ for $t$ times. So expected complexity $t \times 2^{n/2}$
-\end{frame}
-\begin{frame}
-	\frametitle{Cascaded Hash Function}
-	\begin{block}{Cascading}
-		\begin{enumerate}
-		\item A natural way to build large hash values is to concatenate several smaller hashes.
-		\item Consider two hash functions
-		\begin{align*}
-			\mathcal{F}:\{0,1\}^* \to \{0,1\}^n\\
-			\mathcal{G}:\{0,1\}^* \to \{0,1\}^m
-		\end{align*}
-		Construct the cascaded hash $\h(x) = \mathcal{F}(x)\|\mathcal{G}(x)$
-		\item What is the security of $\h$?
-		\pause
-		\item Output size of $\h$ is $(m+n)$, so using birthday attack the complexity will be $2^{\frac{m+n}{2}}$.
-		\item \red{Can we do better?}
-		\end{enumerate}
-	\end{block}
-\end{frame}
-\begin{frame}
-	\frametitle{Cascaded Hash Function}
-	\begin{block}{Attack on Cascaded Hash Function}
-		\begin{enumerate}
-			\item Without the loss of generality, assume $n < m$.
-			\item Using multi-collision idea, find $2^{m/2}$-multi-collisions on $\mathcal{F}$. The complexity of this step is \red{$\frac{m}{2}\times (2^{n/2})$}.
-			\item Now we have $2^{m/2}$ messages with collision value, say $f$ on the $\mathcal{F}$ side.
-		\end{enumerate}
-	\end{block}
-\pause
-The hash values are of the form
-\begin{align*}
-	x_1 &\longrightarrow f\|g_1\\
-	x_2 &\longrightarrow f\|g_2\\
-	\vdots &\\
-	x_{2^{m/2}} &\longrightarrow f\|g_{2^{m/2}}
-\end{align*}
-\end{frame}
-\begin{frame}
-	\frametitle{Cascaded Hash Function}
-	\begin{block}{Attack on Cascaded Hash Function}
-		\begin{enumerate}
-			\item Now according to birthday paradox, these $2^{m/2}$ messages yields collision on the side of $\mathcal{G}$ also.
-			\item We need \red{$2^{m/2}$} calls to $\mathcal{G}$.
-			\item Total complexity \red{$\frac{m}{2}\times (2^{n/2}) + 2^{m/2}$}.
-		\end{enumerate}
-	\end{block}
 \end{frame}
 
 \begin{frame}
