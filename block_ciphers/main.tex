@@ -47,12 +47,12 @@
 \title[Block Cipher]{Tutorial on Block Ciphers}
 % \subtitle{\green{National Workshop on Cryptology 2025, IIT Bhilai}}
 \author[\red{Shibam}]{
-    Shibam Ghosh$^1$
+    {\Large Shibam Ghosh}
 }
-% \date{\today} % or whatever the date you are presenting in is
-\date{January 29, 2026} % or whatever the date you are presenting in is
-\institute[IIT Hyderabad]{$^1$\textcolor{redd}{Department of CSE, IIT Hyderabad}}
+% \date{January 29, 2026} % or whatever the date you are presenting in is
+\institute[IIT Hyderabad]{\textcolor{redd}{{\Large Department of CSE, IIT Hyderabad}}}
 % \institute[INRIA, Paris]{INRIA, Paris, France}
+\date{\today} % or whatever the date you are presenting in is
 
  \AtBeginSection[] { %
     \begin{frame}[noframenumbering]
@@ -543,8 +543,8 @@
         \item No carry bits are generated as coefficients are modulo 2, $1 + 1 = 0$
         \item Therefore, addition, subtraction, and \textbf{XOR ($\oplus$)} are the exact same operation! 
     \end{itemize}
+    \pause
 
-    \vspace{1em}
     % Side-by-side examples
     \begin{columns}[T] % [T] aligns the tops of the columns
         \begin{column}{0.48\textwidth}
@@ -706,6 +706,10 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}{\tx{AES} SubBytes Operation as a Table Lookup}
+    \centering
+    \includegraphics[width=14cm]{./fig/aes_sbox.png}
+\end{frame}
 
 % --- NEW SLIDE: AES Pseudocode (Package-Free Version) ---
 \begin{frame}{Procedure: \texttt{AES\_Encrypt($\pp, \kk$)}}
@@ -730,7 +734,35 @@
 
         \textbf{return} $out$ ($\cc$)
 \end{frame}
+% --- NEW SLIDE: AES Decryption Pseudocode ---
+\begin{frame}{Procedure: \texttt{AES\_Decrypt($\cc, \kk$)}}
+    \vspace{-0.8cm}
+        \small
+        \textbf{Input:} 16-byte array $\cc$, Master-Key $\kk$\\[0.4em]
 
+        $State \gets \cc$ \hfill \textcolor{gray}{\textit{// Initialize state with the ciphertext}} \\
+        $W \gets \text{KeyExpansion}(K)$ \hfill \textcolor{gray}{\textit{// Generate same round keys as encryption}} \\[0.4em]
+
+        \text{AddRoundKey}($State, W[N_r]$) \hfill \textcolor{gray}{\textit{// Use the last round key first}} \\[0.1em]
+
+        \textbf{for} $round \gets N_r - 1$ \textbf{down to} $1$ \textbf{do} \hfill \textcolor{gray}{\textit{// Iterate backwards}} \\
+        \hspace*{2em} \red{\text{InvShiftRows}($State$)} \\
+        \hspace*{2em} \text{InvSubBytes}($State$) \\
+        \hspace*{2em} \text{AddRoundKey}($State, W[round]$) \\
+        \hspace*{2em} \text{InvMixColumns}($State$) \\ [0.1em]
+
+        \text{InvShiftRows}($State$) \hfill \textcolor{gray}{\textit{// Final round (No InvMixColumns)}} \\
+        \text{InvSubBytes}($State$) \\
+        \text{AddRoundKey}($State, W[0]$) \hfill \textcolor{gray}{\textit{// Use the first round key last}}\\[0.4em]
+
+        \textbf{return} $State$ ($\pp$)
+\end{frame}
+
+\begin{frame}{Comparison of Encryption and Decryption}
+\begin{center}
+    \includegraphics[width=0.8\textwidth]{./fig/enc_dec.png}
+\end{center}
+\end{frame}
 % --- SLIDE 6 through 19 (Animation) ---
 \begin{frame}{\tx{AES} Key Schedule Algorithm}
     Master-Key size = $32 \cdot Nk$-bit key (e.g., $Nk = 4$ for \tx{AES-128})
