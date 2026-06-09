@@ -381,16 +381,19 @@
        \end{itemize}
    \pause
    \item \textbf{Standardization (2001):} Officially published as FIPS PUB 197
-
-    \item The cipher has an SP (\red{substitution}-\green{permutation}) network structure.
-    \pause
-    \item Block size: $n = 128$ bits, i.e., $\pp \in \{0,1\}^{128} \text{ or } \pp \in \mathbb{F}_2^{128} \text{ or } \pp \in (\mathbb{F}_2^{8})^{16}$
-    \item Key size: $\kappa =  128, 192, \text{ or } 256$
     \end{itemize}
 \end{frame}
 
 % --- SLIDE 2 ---
 \begin{frame}{Round Function of \tx{AES}}
+    \begin{itemize}
+        \item \tx{AES} has an SP (\red{substitution}-\green{permutation}) network structure.
+        \pause
+    \item Block size: $n = 128$ bits, i.e., $\pp \in \{0,1\}^{128} \text{ or } \pp \in \mathbb{F}_2^{128} \text{ or } \pp \in (\mathbb{F}_{2^{8}})^{16}$
+        \item Key size: $\kappa =  128, 192, \text{ or } 256$
+     \end{itemize}
+    
+     \pause
     \begin{center}
     \begin{tikzpicture}[scale=0.8, every node/.style={scale=0.8}]
         \def\gs{0.6} % grid cell size
@@ -753,7 +756,7 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{\tx{AES}-128 Key Schedule}
+\begin{frame}{\tx{AES} Key Schedule}
 \begin{columns}[t]
 
 \begin{column}{0.2\textwidth}
@@ -811,7 +814,7 @@
 
 \begin{column}{0.3\textwidth}
 \begin{center}
-\begin{tikzpicture}[scale=0.4, transform shape, font=\sffamily]
+\begin{tikzpicture}[scale=0.42, transform shape, font=\sffamily]
     \begin{scope}[xshift=0cm]
     \draw (0,0) rectangle (6,4);
     \draw (0,1) -- +(6,0);
@@ -879,7 +882,7 @@
 
 \begin{column}{0.4\textwidth}
 \begin{center}
-\begin{tikzpicture}[scale=0.4, transform shape, font=\sffamily]
+\begin{tikzpicture}[scale=0.35, transform shape, font=\sffamily]
     \begin{scope}[xshift=0cm]
     \draw (0,0) rectangle (8,4);
     \draw (0,1) -- +(8,0);
@@ -967,116 +970,6 @@
 \end{columns}
 \end{frame}
 
-
-% \begin{frame}{\tx{AES}-128 Key Schedule}
-% \begin{columns}[t]
-
-% \begin{column}{0.3\textwidth}
-% \begin{center}
-% \begin{tikzpicture}[scale=0.6, transform shape, font=\sffamily]
-% \begin{scope}[xshift=0cm]
-%     \draw (0,0) rectangle (4,4);
-%     \draw (0,1) -- +(4,0);
-%     \draw (0,2) -- +(4,0);
-%     \draw (0,3) -- +(4,0);
-%     \draw (1,0) -- +(0,4);
-%     \draw (2,0) -- +(0,4);
-%     \draw (3,0) -- +(0,4);
-%   \end{scope}
-
-%   \begin{scope}[yshift=-9cm]
-%     \draw (0,0) rectangle (4,4);
-%     \draw (0,1) -- +(4,0);
-%     \draw (0,2) -- +(4,0);
-%     \draw (0,3) -- +(4,0);
-%     \draw (1,0) -- +(0,4);
-%     \draw (2,0) -- +(0,4);
-%     \draw (3,0) -- +(0,4);
-%   \end{scope}
-
-%   \draw[->] (0.5,0) -- ++(0,-1+0.25);
-%   \draw[] (0.5,-1) circle (0.25);
-%   \draw[] (0.25,-1) -- ++(0.5,0);  
-%   \draw[->] (3.5,-1) -- ++(-3+0.25,0);
-%   \draw[fill=white] (2.5+0.2,-1-0.25) rectangle node{\large\texttt{<<}} ++(1-0.4,0.5);
-%   \draw[fill=white] (1.5+0.2,-1-0.25) rectangle node{\textsf{S}} ++(1-0.4,0.5);
-%   \draw[->] (0.5,-1+0.25) -- ++(0,-4.5+0.25);
-
-%   \draw[->] (1.5,0) -- ++(0,-2+0.25);
-%   \draw[->] (1.5,-2+0.25) -- ++(0,-3.25);
-%   \draw[->] (0.5, -2) -- ++(1-0.25,0);
-%   \draw[]   (1.5,-2) circle (0.25);
-%   \draw[]   (1.25,-2) -- ++(0.5,0);  
-  
-%   \draw[->] (2.5,0) -- ++(0,-3+0.25);
-%   \draw[->] (2.5,-3+0.25) -- ++(0,-2.25);
-%   \draw[->] (1.5, -3) -- ++(1-0.25,0);
-%   \draw[]   (2.5,-3) circle (0.25);
-%   \draw[]   (2.25,-3) -- ++(0.5,0);  
-
-%   \draw[->] (3.5,0) -- ++(0,-4+0.25);
-%   \draw[->] (3.5,-4+0.25) -- ++(0,-1.25);
-%   \draw[->] (2.5, -4) -- ++(1-0.25,0);
-%   \draw[]   (3.5,-4) circle (0.25);
-%   \draw[]   (3.25,-4) -- ++(0.5,0);  
-
-% \end{tikzpicture}
-% \end{center}
-% \end{column}
-
-% \begin{column}{0.3\textwidth}
-% \begin{center}
-% \begin{tikzpicture}[scale=0.6, transform shape, font=\sffamily]
-% \begin{scope}[xshift=0cm]
-%     \draw (0,0) rectangle (4,4);
-%     \draw (0,1) -- +(4,0);
-%     \draw (0,2) -- +(4,0);
-%     \draw (0,3) -- +(4,0);
-%     \draw (1,0) -- +(0,4);
-%     \draw (2,0) -- +(0,4);
-%     \draw (3,0) -- +(0,4);
-%   \end{scope}
-
-%   \begin{scope}[yshift=-9cm]
-%     \draw (0,0) rectangle (4,4);
-%     \draw (0,1) -- +(4,0);
-%     \draw (0,2) -- +(4,0);
-%     \draw (0,3) -- +(4,0);
-%     \draw (1,0) -- +(0,4);
-%     \draw (2,0) -- +(0,4);
-%     \draw (3,0) -- +(0,4);
-%   \end{scope}
-
-%   \draw[->] (0.5,0) -- ++(0,-1+0.25);
-%   \draw[] (0.5,-1) circle (0.25);
-%   \draw[] (0.25,-1) -- ++(0.5,0);  
-%   \draw[->] (3.5,-1) -- ++(-3+0.25,0);
-%   \draw[fill=white] (2.5+0.2,-1-0.25) rectangle node{\large\texttt{<<}} ++(1-0.4,0.5);
-%   \draw[fill=white] (1.5+0.2,-1-0.25) rectangle node{\textsf{S}} ++(1-0.4,0.5);
-%   \draw[->] (0.5,-1+0.25) -- ++(0,-4.5+0.25);
-
-%   \draw[->] (1.5,0) -- ++(0,-2+0.25);
-%   \draw[->] (1.5,-2+0.25) -- ++(0,-3.25);
-%   \draw[->] (0.5, -2) -- ++(1-0.25,0);
-%   \draw[]   (1.5,-2) circle (0.25);
-%   \draw[]   (1.25,-2) -- ++(0.5,0);  
-  
-%   \draw[->] (2.5,0) -- ++(0,-3+0.25);
-%   \draw[->] (2.5,-3+0.25) -- ++(0,-2.25);
-%   \draw[->] (1.5, -3) -- ++(1-0.25,0);
-%   \draw[]   (2.5,-3) circle (0.25);
-%   \draw[]   (2.25,-3) -- ++(0.5,0);  
-
-%   \draw[->] (3.5,0) -- ++(0,-4+0.25);
-%   \draw[->] (3.5,-4+0.25) -- ++(0,-1.25);
-%   \draw[->] (2.5, -4) -- ++(1-0.25,0);
-%   \draw[]   (3.5,-4) circle (0.25);
-%   \draw[]   (3.25,-4) -- ++(0.5,0);  
-
-% \end{tikzpicture}
-% \end{center}
-% \end{column}
-% \end{frame}
 
 \section{The Feistel Structure and \tx{DES}}
 % --- SLIDE 2: The Feistel Structure (Visual + Math) ---
@@ -1231,10 +1124,9 @@
         \begin{column}{0.50\linewidth}
             \begin{figure}[!h]
                 \centering
-                \includegraphics[width=5.7cm]{./img/qr_with_logo.png}
+                \includegraphics[width=5.7cm]{./img/web.png}
             \end{figure}
         \end{column}
-        \pause
         \begin{column}{0.50\linewidth}
             \begin{center}
                 {\huge {\color{red} Thank You} for your attention!} \\ \Large Any questions?
