@@ -45,15 +45,13 @@
 
 
 \title[Key Recovery Attack on \texttt{FEAT\_PACQARMA3}]{Key Recovery Attack on \texttt{FEAT\_PACQARMA3} Feature}
-% \subtitle{\green{National Workshop on Cryptology 2025, IIT Bhilai}}
-\author[\red{Shibam}]{Roberto avanzi
-    \and Orr Dunkelman
-    \and \red{Shibam Ghosh}$^1$
+\author[\red{Shibam}]{
+    {\Large Shibam Ghosh}
 }
-% \date{\today} % or whatever the date you are presenting in is
-\date{January 29, 2026} % or whatever the date you are presenting in is
-\institute[IIT Hyderabad]{$^1$\textcolor{redd}{Department of CSE, IIT Hyderabad}}
+% \date{January 29, 2026} % or whatever the date you are presenting in is
+\institute[IIT Hyderabad]{\textcolor{redd}{{\Large Department of CSE, IIT Hyderabad}}}
 % \institute[INRIA, Paris]{INRIA, Paris, France}
+\date{\today} % or whatever the date you are presenting in is
 
  \AtBeginSection[] { %
     \begin{frame}[noframenumbering]
@@ -217,11 +215,21 @@
 
 \end{enumerate}
 \end{frame}
-\begin{frame}
-\frametitle{Block Cipher}
-    \centering
-    \includegraphics[width=17cm]{./fig/bc.pdf}
-\end{frame}
+
+% \begin{frame}
+% \frametitle{Block Cipher}
+%     \centering
+%     \includegraphics[width=10cm]{./fig/bc.png}
+
+%         \vfill
+%     \pause
+
+%     \begin{itemize}
+%         \item $\mathcal{E}: \{0,1\}^n \times \{0,1\}^{\kappa} \to \{0,1\}^n \text{ s.t. } \cc = \mathcal{E}(\pp, \kk)$
+%         \item $\mathcal{E}_{\kk}: \{0,1\}^n \to \{0,1\}^n \text{ s.t. } \cc = \mathcal{E}_{\kk}(\pp)$
+%     \end{itemize}
+
+% \end{frame}
 
 \tikzset{
     blockcipher1/.style={
@@ -290,69 +298,70 @@
         at (9.5, 1.8) {Cyber-Physical\\Systems};
 }
 
-\begin{frame}
-\frametitle{Iterated Block Cipher}
-\begin{figure}
-	\centering
-	{%
-		% \setlength{\fboxsep}{0.5pt}%
-		% \setlength{\fboxrule}{0.5pt}%
-		% \fbox{
-            \resizebox{\textwidth}{!}{
-				\begin{tikzpicture}[scale=1]
+% \begin{frame}
+% \frametitle{Iterated Block Cipher}
+% \begin{figure}
+% 	\centering
+% 	{%
+% 		% \setlength{\fboxsep}{0.5pt}%
+% 		% \setlength{\fboxrule}{0.5pt}%
+% 		% \fbox{
+%             \resizebox{\textwidth}{!}{
+% 				\begin{tikzpicture}[scale=1]
 
-				\tikzstyle{every node}=[transform shape];
-				\tikzstyle{every node}=[node distance=1.5cm];
+% 				\tikzstyle{every node}=[transform shape];
+% 				\tikzstyle{every node}=[node distance=1.5cm];
 
-                \draw[semithick, color = bluee, rounded corners=1mm] (-0.9,-0.6) rectangle (7.3,2.8) node[above left] {Block Cipher};
+%                 \draw[semithick, color = bluee, rounded corners=1mm] (-0.9,-0.6) rectangle (7.3,2.8) node[above left] {Block Cipher};
 
-				% Expansion Algorithm
-				\node (KS) [draw,trapezium,trapezium left angle=40,trapezium right angle=40,minimum height=0.75cm,semithick,fill=blue!15,shift={(3.2,2)},inner xsep=40pt] {Key Schedule};
+% 				% Expansion Algorithm
+% 				\node (KS) [draw,trapezium,trapezium left angle=40,trapezium right angle=40,minimum height=0.75cm,semithick,fill=blue!15,shift={(3.2,2)},inner xsep=40pt] {Key Schedule};
 
-                \node (k) [above=0.8cm of KS] {$\kk$};
-				\path[line] (k) edge (KS);
+%                 \node (k) [above=0.8cm of KS] {$\kk$};
+% 				\path[line] (k) edge (KS);
 
-				% Data path
-                \node[roundfunction] (R-1) {$R_1$};
-                \node [left of=R-1] (p) {$\pp$};
-				\path[line] (p) edge (R-1);
+% 				% Data path
+%                 \node[roundfunction] (R-1) {$R_1$};
+%                 \node [left of=R-1] (p) {$\pp$};
+% 				\path[line] (p) edge (R-1);
 
-				\node[roundfunction, right of=R-1] (R-2) {$R_2$};
-				\path[line] (R-1) edge node[below] {} (R-2);
-
-
-				\node (dots)[right of=R-2] {$\cdots\cdots$};
-				\path[line] (R-2) edge (dots);
-				\node[roundfunction, right of=dots] (R-3){$R_{r-1}$};
-				\path[line] (dots) edge (R-3) ;
+% 				\node[roundfunction, right of=R-1] (R-2) {$R_2$};
+% 				\path[line] (R-1) edge node[below] {} (R-2);
 
 
-				\node[roundfunction, right of=R-3] (R-4)[node distance=1.9cm] {$R_r$};
-				\path[line] (R-3) edge node[below] {} (R-4);
-                \node [right of=R-4,node distance=1.5cm] (c) {$\cc$};
-				\path[line] (R-4) edge (c);
+% 				\node (dots)[right of=R-2] {$\cdots\cdots$};
+% 				\path[line] (R-2) edge (dots);
+% 				\node[roundfunction, right of=dots] (R-3){$R_{r-1}$};
+% 				\path[line] (dots) edge (R-3) ;
 
-				%% Subkeys
-				\node (k-0) [above=1.15cm of R-1] {};
-				\path[line] (k-0) edge node[right] {\small $k_{1}$} (R-1);
 
-				\node (k-1) [above=1.15cm of R-2] {};
-				\path[line] (k-1) edge node[right] {\small $k_{2}$} (R-2);
+% 				\node[roundfunction, right of=R-3] (R-4)[node distance=1.9cm] {$R_r$};
+% 				\path[line] (R-3) edge node[below] {} (R-4);
+%                 \node [right of=R-4,node distance=1.5cm] (c) {$\cc$};
+% 				\path[line] (R-4) edge (c);
 
-				\node (k-2) [above=1.15cm of R-3] {};
-				\path[line] (k-2) edge node[right] {\small $k_{r-1}$} (R-3);
+% 				%% Subkeys
+% 				\node (k-0) [above=1.15cm of R-1] {};
+% 				\path[line] (k-0) edge node[right] {\small $k_{1}$} (R-1);
 
-				\node (k-3) [above=1.15cm of R-4] {};
-				\path[line] (k-3) edge node[right] {\small $k_{r}$} (R-4);
+% 				\node (k-1) [above=1.15cm of R-2] {};
+% 				\path[line] (k-1) edge node[right] {\small $k_{2}$} (R-2);
 
-				\end{tikzpicture}
+% 				\node (k-2) [above=1.15cm of R-3] {};
+% 				\path[line] (k-2) edge node[right] {\small $k_{r-1}$} (R-3);
 
-			}
-		}%
-	% }%
-	% \caption{\label{fig:product}Iterated block cipher.}
-\end{figure}
-\end{frame}
+% 				\node (k-3) [above=1.15cm of R-4] {};
+% 				\path[line] (k-3) edge node[right] {\small $k_{r}$} (R-4);
+
+% 				\end{tikzpicture}
+
+% 			}
+% 		}%
+% 	% }%
+% 	% \caption{\label{fig:product}Iterated block cipher.}
+% \end{figure}
+% \end{frame}
+
 \begin{frame}
 \frametitle{Iterated Tweakable Block Cipher with TWEAKEY Schedule}
 \begin{figure}
@@ -542,7 +551,7 @@
 \section{Differential Cryptanalysis of \texttt{FEAT\_PACQARMA3}}
 
 \begin{frame}
-    \frametitle{Cryptanalysis Perspective: \blue{Real} vs \green{Ideal} Distinguishing Game}
+    \frametitle{Cryptanalysis 1: \blue{Real} vs \green{Ideal} Distinguishing Game}
 \centering
 \textcolor{blue}{$\mathcal{E} \colon \mathcal{P} \times \mathcal{K} \to \mathcal{C}$} is a block cipher and \green{$\Pi$} is a random permutation
 
@@ -567,11 +576,11 @@
     \end{center}
 \end{frame}
 
-\begin{frame}
-\frametitle{Cryptanalysis Perspective}
-    \centering
-    \Large{\red{"Searching `Distinguisher'"} $|$ \blue{Key Recovery}}
-\end{frame}
+% \begin{frame}
+% \frametitle{Cryptanalysis Perspective}
+%     \centering
+%     \Large{\red{"Searching `Distinguisher'"} $|$ \blue{Key Recovery}}
+% \end{frame}
 
 \begin{frame}
 \frametitle{Differential Distinguisher}
